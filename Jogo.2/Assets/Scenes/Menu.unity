@@ -1164,6 +1164,7 @@ GameObject:
   - component: {fileID: 437429992}
   - component: {fileID: 437429991}
   - component: {fileID: 437429994}
+  - component: {fileID: 437429995}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1289,6 +1290,18 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &437429995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 437429990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 318b830a758a73e4c89a8a3ecc752bb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FirebaseManager
 --- !u!1 &500818546
 GameObject:
   m_ObjectHideFlags: 0

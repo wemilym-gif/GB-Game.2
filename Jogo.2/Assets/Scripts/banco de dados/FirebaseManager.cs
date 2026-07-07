@@ -21,9 +21,7 @@ public class FirebaseManager : MonoBehaviour
     DatabaseReference reference;
 
     [Header("Dados do Teste")]
-    public string idPaciente = "tulio_delmiro";
-    public int pontosParaSalvar = 150;
-    public float oscilacaoParaSalvar = 1.45f;
+    public string idPaciente = "kenedy pietro ";
 
     void Start() {
         FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
@@ -35,12 +33,14 @@ public class FirebaseManager : MonoBehaviour
         });
     }
 
-    public void SalvarPartida() {
+    // AGORA A FUNÇÃO RECEBE OS DADOS DIRETAMENTE DO PLAYER
+    public void SalvarPartida(int pontosParaSalvar, float oscilacaoParaSalvar) {
         if (reference == null) {
             Debug.LogError("Firebase ainda não inicializou!");
             return;
         }
 
+        // Cria a sessão com os dados reais passados pelo Player.cs
         DadosSessao novaSessao = new DadosSessao(pontosParaSalvar, oscilacaoParaSalvar);
         string json = JsonUtility.ToJson(novaSessao);
 

@@ -10,16 +10,12 @@ public class ConnectBalance : MonoBehaviour
     [Header("Configuração da Balança")]
     public static int remoteIndex = 0; // Índice do Wii Remote associado à Balance Board
 
-    // =========================
-    //      REFERÊNCIAS DE UI
-    // =========================
+ 
     public TMP_Text connectText;       // Texto que exibe o estado da conexão
     public Color normalColor = Color.green; // Cor usada quando a balança está conectada
     public Color alertColor = Color.red;    // Cor usada quando a balança está desconectada
 
-    // =========================
-    //     CICLO DE ATUALIZAÇÃO
-    // =========================
+   
     void Update()
     {
         // Verifica continuamente o estado da conexão da Balance Board

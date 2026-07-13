@@ -147,10 +147,10 @@ public class Player : MonoBehaviour
             if (life == 0)
             {
                 // 1. Procura o FirebaseManager na cena e envia os dados
-                FirebaseManager firebase = FindObjectOfType<FirebaseManager>();
+                FirebaseManager firebase = FindFirstObjectByType<FirebaseManager>(); 
                 if (firebase != null)
                 {
-                    firebase.SalvarPartida (countShell, 0.45f);
+                    firebase.SalvarPartida(); 
                 }
                 else
                 {
@@ -269,5 +269,5 @@ public class Player : MonoBehaviour
 
             Debug.Log($"Quadrante 1: {sensors.x:F2} kg; Quadrante 2: {sensors.y:F2} kg; Quadrante 3: {sensors.w:F2} kg; Quadrante 4: {sensors.z:F2} kg");
         }
-    }
+    } 
 }

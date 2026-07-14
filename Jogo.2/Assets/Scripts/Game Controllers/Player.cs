@@ -146,13 +146,11 @@ public class Player : MonoBehaviour
             // Caso o jogador perca todas as vidas
             if (life == 0)
             {
-                // 1. Procura o FirebaseManager na cena de forma atualizada (sem aviso de obsoleto)
-                FirebaseManager firebase = FindFirstObjectByType<FirebaseManager>();
+                // 1. Procura o FirebaseManager na cena e envia os dados
+                FirebaseManager firebase = FindFirstObjectByType<FirebaseManager>(); 
                 if (firebase != null)
                 {
-                    // Tenta salvar usando os parâmetros. Se o FirebaseManager não aceitar 2 argumentos,
-                    // use a dica abaixo para ajustar o script do Firebase.
-                    firebase.SalvarPartida(countShell, 0.45f);
+                    firebase.SalvarPartida(); 
                 }
                 else
                 {
@@ -249,35 +247,27 @@ public class Player : MonoBehaviour
         {
             Vector4 sensors = Wii.GetBalanceBoard(remoteIndex);
 
-            // Invertendo o mapeamento com base no comportamento real do seu console:
-            // Seu lado esquerdo físico está ativando os sensores X e Z.
-            float totalEsquerda = sensors.x + sensors.z;
-        
-            // Seu lado direito físico está ativando os sensores Y e W.
-            float totalDireita = sensors.y + sensors.w;
+            if (sensors.x > 0f && sensors.x < 1.3f) sensors.x = 0f;
+            else if (sensors.y > -1f && sensors.y < 0f) sensors.y = 0f;
+            else if (sensors.w > -1f && sensors.w < 0f) sensors.w = 0f;
+            else if (sensors.z > 0 && sensors.z < 2.90f) sensors.z = 0f;
 
-            // Margem de erro para o boneco não andar sozinho
-            float sensibilidadeMover = 3.0f; 
-
-            // Se o peso na esquerda for maior, move para a esquerda (Vetor -1)
-            if (totalEsquerda > totalDireita + sensibilidadeMover)
+            if ((sensors.y + sensors.w) > (BalanceBoardCalibration.playerWeight / 2) + 5)
             {
                 movement = new Vector2(-1, 0);
                 if (facingRight) Flip();
-                Debug.Log($"Esquerda: {totalEsquerda:F2}kg | Direita: {totalDireita:F2}kg -> MOVENDO ESQUERDA");
             }
-            // Se o peso na direita for maior, move para a direita (Vetor 1)
-            else if (totalDireita > totalEsquerda + sensibilidadeMover)
+            else if (sensors.x + sensors.z > (BalanceBoardCalibration.playerWeight / 2) + 5)
             {
                 movement = new Vector2(1, 0);
                 if (!facingRight) Flip();
-                Debug.Log($"Esquerda: {totalEsquerda:F2}kg | Direita: {totalDireita:F2}kg -> MOVENDO DIREITA");
             }
             else
             {
                 movement = Vector2.zero;
-                Debug.Log($"Esquerda: {totalEsquerda:F2}kg | Direita: {totalDireita:F2}kg -> PARADO NO CENTRO");
             }
+
+            Debug.Log($"Quadrante 1: {sensors.x:F2} kg; Quadrante 2: {sensors.y:F2} kg; Quadrante 3: {sensors.w:F2} kg; Quadrante 4: {sensors.z:F2} kg");
         }
-    }
+    } 
 }

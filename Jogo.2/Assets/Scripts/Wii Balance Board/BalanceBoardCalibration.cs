@@ -33,7 +33,7 @@ public class BalanceBoardCalibration : MonoBehaviour
     public bool isCalibrating { get; private set; } = false;
 
     // Indica se a calibração já foi concluída com sucesso
-    public bool calibrationComplete { get; private set; } = false;
+    public static float playerWeight = 0f;
 
     // Guarda o estado atual da conexão da Balance Board
     private bool boardConnected = false;

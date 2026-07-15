@@ -239,35 +239,61 @@ public class Player : MonoBehaviour
     // CONTROLE POR WII BALANCE BOARD
     // =========================
 
-    void NintendoBalanceBoardMove()
+   void NintendoBalanceBoardMove()
+{
+    if (!Wii.IsActive(remoteIndex)) return;
+
+    if (Wii.GetExpType(remoteIndex) == 3)
     {
-        if (!Wii.IsActive(remoteIndex)) return;
+        Vector4 sensors = Wii.GetBalanceBoard(remoteIndex);
 
-        if (Wii.GetExpType(remoteIndex) == 3)
+        // 1. Filtros de ruído aplicados INDEPENDENTEMENTE para cada sensor (Valores positivos reais)
+        float deadzone = 1.3f; 
+
+        if (sensors.x >= 0f && sensors.x < deadzone) sensors.x = 0f;
+        if (sensors.y >= 0f && sensors.y < deadzone) sensors.y = 0f;
+        if (sensors.w >= 0f && sensors.w < deadzone) sensors.w = 0f;
+        if (sensors.z >= 0f && sensors.z < deadzone) sensors.z = 0f;
+
+        // 2. Recupera o peso calibrado do outro script
+        float pesoReferencia = BalanceBoardCalibration.playerWeight;
+
+        // SEGURO DE FALHA: Se a calibração veio zerada ou o script de calibração reiniciou,
+        // nós calculamos o peso atual do jogador dinamicamente para o jogo não travar.
+        if (pesoReferencia < 10f)
         {
-            Vector4 sensors = Wii.GetBalanceBoard(remoteIndex);
-
-            if (sensors.x > 0f && sensors.x < 1.3f) sensors.x = 0f;
-            else if (sensors.y > -1f && sensors.y < 0f) sensors.y = 0f;
-            else if (sensors.w > -1f && sensors.w < 0f) sensors.w = 0f;
-            else if (sensors.z > 0 && sensors.z < 2.90f) sensors.z = 0f;
-
-            if ((sensors.y + sensors.w) > (BalanceBoardCalibration.playerWeight / 2) + 5)
-            {
-                movement = new Vector2(-1, 0);
-                if (facingRight) Flip();
-            }
-            else if (sensors.x + sensors.z > (BalanceBoardCalibration.playerWeight / 2) + 5)
-            {
-                movement = new Vector2(1, 0);
-                if (!facingRight) Flip();
-            }
-            else
-            {
-                movement = Vector2.zero;
-            }
-
-            Debug.Log($"Quadrante 1: {sensors.x:F2} kg; Quadrante 2: {sensors.y:F2} kg; Quadrante 3: {sensors.w:F2} kg; Quadrante 4: {sensors.z:F2} kg");
+            pesoReferencia = sensors.x + sensors.y + sensors.w + sensors.z;
+            
+            // Se ainda assim não tiver ninguém em cima da balança, assume um peso padrão mínimo
+            if (pesoReferencia < 10f) pesoReferencia = 70f; 
         }
-    } 
+
+        // 3. Calcula o limiar de inclinação (Metade do peso + tolerância de 4kg para evitar movimentos involuntários)
+        float threshold = (pesoReferencia / 2f) + 4f;
+
+        // Lado Esquerdo = Superior Esquerdo + Inferior Esquerdo
+        float pesoEsquerda = sensors.y + sensors.w; 
+        // Lado Direito = Superior Direito + Inferior Direito
+        float pesoDireita = sensors.x + sensors.z;  
+
+        // 4. Aplica a movimentação baseada nas forças reais calculadas
+        if (pesoEsquerda > threshold)
+        {
+            movement = new Vector2(-1, 0); // Move para a esquerda
+            if (facingRight) Flip();
+        }
+        else if (pesoDireita > threshold)
+        {
+            movement = new Vector2(1, 0);  // Move para a direita
+            if (!facingRight) Flip();
+        }
+        else
+        {
+            movement = Vector2.zero;       // Fica parado no centro
+        }
+
+        // Log detalhado para você acompanhar no console se os lados estão registrando os quilos corretamente
+        Debug.Log($"[WII BOARD] Peso Calibrado Ref: {pesoReferencia:F2}kg | Esquerda: {pesoEsquerda:F2}kg (Limiar: >{threshold:F2}kg) | Direita: {pesoDireita:F2}kg (Limiar: >{threshold:F2}kg)");
+    }
+}
 }

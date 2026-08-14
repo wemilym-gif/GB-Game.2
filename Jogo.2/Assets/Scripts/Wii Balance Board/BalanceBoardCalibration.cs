@@ -26,14 +26,14 @@ public class BalanceBoardCalibration : MonoBehaviour
     // =========================
     //  RESULTADOS DA CALIBRAÇÃO
     // =========================
-    // Peso médio calculado do jogador (acessível globalmente)
+    // Peso médio calculated do jogador (acessível globalmente)
     public static float playerWeight { get; private set; } = 0f;
 
     // Indica se o processo de calibração está em andamento
     public bool isCalibrating { get; private set; } = false;
 
-    // Indica se a calibração já foi concluída com sucesso
-    public static float playerWeight = 0f;
+    // Indica se a calibração já foi concluída com sucesso (Corrigido aqui!)
+    public bool calibrationComplete { get; private set; } = false;
 
     // Guarda o estado atual da conexão da Balance Board
     private bool boardConnected = false;

@@ -255,6 +255,8 @@ public class Player : MonoBehaviour
         if (sensors.w >= 0f && sensors.w < deadzone) sensors.w = 0f;
         if (sensors.z >= 0f && sensors.z < deadzone) sensors.z = 0f;
 
+        
+        
         // 2. Recupera o peso calibrado do outro script
         float pesoReferencia = BalanceBoardCalibration.playerWeight;
 
@@ -276,9 +278,13 @@ public class Player : MonoBehaviour
         // Lado Direito = Superior Direito + Inferior Direito
         float pesoDireita = sensors.x + sensors.z;  
 
+        Debug.Log(pesoEsquerda);
+        
         // 4. Aplica a movimentação baseada nas forças reais calculadas
         if (pesoEsquerda > threshold)
         {
+            
+            
             movement = new Vector2(-1, 0); // Move para a esquerda
             if (facingRight) Flip();
         }
@@ -293,7 +299,7 @@ public class Player : MonoBehaviour
         }
 
         // Log detalhado para você acompanhar no console se os lados estão registrando os quilos corretamente
-        Debug.Log($"[WII BOARD] Peso Calibrado Ref: {pesoReferencia:F2}kg | Esquerda: {pesoEsquerda:F2}kg (Limiar: >{threshold:F2}kg) | Direita: {pesoDireita:F2}kg (Limiar: >{threshold:F2}kg)");
+       // Debug.Log($"[WII BOARD] Peso Calibrado Ref: {pesoReferencia:F2}kg | Esquerda: {pesoEsquerda:F2}kg (Limiar: >{threshold:F2}kg) | Direita: {pesoDireita:F2}kg (Limiar: >{threshold:F2}kg)");
     }
 }
 }

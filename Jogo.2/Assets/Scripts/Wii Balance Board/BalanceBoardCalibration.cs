@@ -6,125 +6,148 @@ using static Wii;
 
 public class BalanceBoardCalibration : MonoBehaviour
 {
-    // =========================
-    //   CONFIGURAÇÃO DA BALANÇA
-    // =========================
+   
     [Header("Configuração da Balança")]
-    public static int remoteIndex = 0;      // Índice do Wii Remote conectado à Balance Board
-    public float detectionThreshold = 5f;   // Peso mínimo para detectar presença do jogador
-    public float measureDuration = 5f;      // Tempo (em segundos) de medição do peso
-
-    // =========================
-    //      REFERÊNCIAS DE UI
-    // =========================
+    public static int remoteIndex = 0;      
+    public float detectionThreshold = 5f;   
+    public float measureDuration = 5f;     
+    public float deadzone = 0.1f;         
+    
+   
     [Header("Referências de UI")]
-    public TMP_Text messageText;     // Mensagens principais ao jogador
-    public TMP_Text countdownText;   // Contagem regressiva da calibração
-    public TMP_Text resultText;      // Resultado final da calibração
-    public GameObject playButton;    // Botão para iniciar o jogo após calibrar
+    public TMP_Text messageText;     
+    public TMP_Text countdownText;   
+    public TMP_Text resultText;      
+    public GameObject playButton;    
 
-    // =========================
-    //  RESULTADOS DA CALIBRAÇÃO
-    // =========================
-    // Peso médio calculated do jogador (acessível globalmente)
+ 
     public static float playerWeight { get; private set; } = 0f;
 
-    // Indica se o processo de calibração está em andamento
+    public static float HorizontalInput { get; private set; } = 0f;
+
+   
     public bool isCalibrating { get; private set; } = false;
 
-    // Indica se a calibração já foi concluída com sucesso (Corrigido aqui!)
+    
     public bool calibrationComplete { get; private set; } = false;
 
-    // Guarda o estado atual da conexão da Balance Board
+  
     private bool boardConnected = false;
 
     void Start()
     {
-        // Garante que o tempo do jogo esteja normal
         Time.timeScale = 1f;
 
-        // Verifica a conexão logo ao iniciar a cena
+       
+        if (!Wii.IsSearching())
+        {
+            Wii.StartSearch();
+        }
+
         CheckConnection();
     }
 
     void Update()
     {
-        // Detecta mudança no estado da conexão da Balance Board
+        
         if (Wii.IsActive(remoteIndex) != boardConnected)
         {
             CheckConnection();
         }
 
-        // Se a Balance Board estiver conectada, trata a calibração
         if (boardConnected)
         {
+           
+            CalculateCenterOfPressure();
+            
+          
             HandleCalibration();
+        }
+        else
+        {
+            HorizontalInput = 0f;
         }
     }
 
-    // =========================
-    //   VERIFICAÇÃO DE CONEXÃO
-    // =========================
+    
     void CheckConnection()
     {
-        // Verifica se o Wii Remote está ativo e se o acessório é uma Balance Board (tipo 3)
         if (Wii.IsActive(remoteIndex) && Wii.GetExpType(remoteIndex) == 3)
         {
             boardConnected = true;
 
-            // Atualiza a UI para instruir o jogador
-            messageText.text = "Suba no aparelho para iniciar!";
-            countdownText.text = "";
-            resultText.text = "";
-            playButton.SetActive(false);
+            if (messageText != null) messageText.text = "Suba no aparelho para iniciar!";
+            if (countdownText != null) countdownText.text = "";
+            if (resultText != null) resultText.text = "";
+            if (playButton != null) playButton.SetActive(false);
         }
         else
         {
             boardConnected = false;
 
-            // Informa que a Balance Board não está disponível
-            messageText.text = "Balance Board desconectada!\nModo Manual ativado";
-            countdownText.text = "";
-            resultText.text = "";
+            if (messageText != null) messageText.text = "Balance Board desconectada!\nModo Manual ativado";
+            if (countdownText != null) countdownText.text = "";
+            if (resultText != null) resultText.text = "";
 
-            // Permite jogar sem a Balance Board
-            playButton.SetActive(true);
+            if (playButton != null) playButton.SetActive(true);
 
             Debug.LogWarning("Modo Manual ativado (sem Balance Board)");
         }
     }
 
-    // =========================
-    //    LÓGICA DE CALIBRAÇÃO
-    // =========================
+   
+    private void CalculateCenterOfPressure()
+    {
+        float totalWeight = Wii.GetTotalWeight(remoteIndex);
+
+        if (totalWeight > detectionThreshold)
+        {
+            // Obtém o Centro de Balanço retornado nativamente pelo WiiBuddy (Vector2 onde X = inclinação horizontal)
+            Vector2 centerOfBalance = Wii.GetCenterOfBalance(remoteIndex);
+
+            float rawInput = centerOfBalance.x;
+
+            // Aplica a zona morta
+            if (Mathf.Abs(rawInput) < deadzone)
+            {
+                HorizontalInput = 0f;
+            }
+            else
+            {
+                //Debug.Log(rawInput);
+                HorizontalInput = Mathf.Clamp(rawInput, -1f, 1f);
+               // Debug.Log(HorizontalInput);
+            }
+        }
+        else
+        {
+            HorizontalInput = 0f;
+        }
+    }
+
+   
     void HandleCalibration()
     {
-        // Obtém o peso total atual da Balance Board
         float currentWeight = Wii.GetTotalWeight(remoteIndex);
 
-        // Inicia a calibração quando o jogador sobe na balança
         if (!isCalibrating && !calibrationComplete && currentWeight > detectionThreshold)
         {
             StartCoroutine(CalibratePlayerWeight());
         }
     }
 
-    // =========================
-    //  ROTINA DE CALIBRAÇÃO
-    // =========================
+  
     private IEnumerator CalibratePlayerWeight()
     {
         isCalibrating = true;
 
-        // Mensagens iniciais
-        messageText.text = "Calibrando... Mantenha-se parado";
-        resultText.text = "Calculando peso:";
+        if (messageText != null) messageText.text = "Calibrando... Mantenha-se parado";
+        if (resultText != null) resultText.text = "Calculando peso:";
 
         float elapsed = 0f;
         float sum = 0f;
         int samples = 0;
 
-        // Mede o peso durante um intervalo fixo
         while (elapsed < measureDuration)
         {
             float w = Wii.GetTotalWeight(remoteIndex);
@@ -133,15 +156,13 @@ public class BalanceBoardCalibration : MonoBehaviour
             samples++;
             elapsed += Time.unscaledDeltaTime;
 
-            // Atualiza a contagem regressiva
-            countdownText.text = $"{measureDuration - elapsed:F1}s";
+            if (countdownText != null) countdownText.text = $"{measureDuration - elapsed:F1}s";
 
-            // Se o jogador sair da balança, cancela a calibração
             if (w < detectionThreshold)
             {
-                messageText.text = "Jogador saiu do aparelho! Tente novamente";
-                countdownText.text = "";
-                resultText.text = "";
+                if (messageText != null) messageText.text = "Jogador saiu do aparelho! Tente novamente";
+                if (countdownText != null) countdownText.text = "";
+                if (resultText != null) resultText.text = "";
                 isCalibrating = false;
                 yield break;
             }
@@ -149,18 +170,15 @@ public class BalanceBoardCalibration : MonoBehaviour
             yield return null;
         }
 
-        // Calcula o peso médio do jogador
         playerWeight = (samples > 0) ? (sum / samples) : 0f;
 
         calibrationComplete = true;
         isCalibrating = false;
 
-        // Atualiza a UI com o resultado final
-        messageText.text = "Ajuste finalizado!";
-        countdownText.text = "";
-        resultText.text = $"Peso armazenado: {playerWeight:F2} kg";
+        if (messageText != null) messageText.text = "Ajuste finalizado!";
+        if (countdownText != null) countdownText.text = "";
+        if (resultText != null) resultText.text = $"Peso armazenado: {playerWeight:F2} kg";
 
-        // Libera o botão de jogar
-        playButton.SetActive(true);
+        if (playButton != null) playButton.SetActive(true);
     }
 }

@@ -2,39 +2,41 @@ using System;
 using UnityEngine;
 using System.Collections;
 using TMPro;
+using Unity.VisualScripting;
 using static Wii;
 
 public class BalanceBoardCalibration : MonoBehaviour
 {
-   
-    [Header("Configuração da Balança")]
-    public static int remoteIndex = 0;      
-    public float detectionThreshold = 5f;   
-    public float measureDuration = 5f;     
-    public float deadzone = 0.1f;         
-    
-   
-    [Header("Referências de UI")]
-    public TMP_Text messageText;     
-    public TMP_Text countdownText;   
-    public TMP_Text resultText;      
-    public GameObject playButton;    
 
- 
+    [Header("Configuração da Balança")] public static int remoteIndex = 0;
+    public float detectionThreshold = 5f;
+    public float measureDuration = 5f;
+    public float deadzone = 0.1f;
+
+
+    [Header("Referências de UI")] public TMP_Text messageText;
+    public TMP_Text countdownText;
+    public TMP_Text resultText;
+    public GameObject playButton;
+
+
     public static float playerWeight { get; private set; } = 0f;
 
     public static float HorizontalInput { get; private set; } = 0f;
 
-   
+
     public bool isCalibrating { get; private set; } = false;
 
-    
+
     public bool calibrationComplete { get; private set; } = false;
 
-  
+
     private bool boardConnected = false;
 
-    void Start()
+  
+
+
+void Start()
     {
         Time.timeScale = 1f;
 
@@ -45,6 +47,7 @@ public class BalanceBoardCalibration : MonoBehaviour
         }
 
         CheckConnection();
+        
     }
 
     void Update()

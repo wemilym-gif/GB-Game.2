@@ -3008,21 +3008,28 @@ public class Wii : MonoBehaviour
     				errorCode=0;
     				clearDiscoveryStatus();
     			}
-    			else
-    			{
-    				//otherwise
-    				errorCode = status;
-					Debug.LogWarning("spread the message: error"+status);
-					ErrorManualModeText.errorText.SetActive(true);
-					//new way
-					if(OnDiscoveryFailed != null)
-					{
-						OnDiscoveryFailed(status);
-					}
-					//old way
-    				gameObject.BroadcastMessage("OnDiscoveryError", status,SendMessageOptions.DontRequireReceiver);
-    				//don't clear status yet. the editor expansion might need to know
-    			}
+			    else
+			    {
+				    // otherwise
+				    errorCode = status;
+				    Debug.LogWarning("spread the message: error" + status);
+
+				    
+				    if (ErrorManualModeText.errorText != null)
+				    {
+					    ErrorManualModeText.errorText.SetActive(true);
+				    }
+
+				    // new way
+				    if (OnDiscoveryFailed != null)
+				    {
+					    OnDiscoveryFailed(status);
+				    }
+
+				   
+				    gameObject.BroadcastMessage("OnDiscoveryError", status, SendMessageOptions.DontRequireReceiver);
+				
+			    }
     		}
     		if(status==0)
     		{

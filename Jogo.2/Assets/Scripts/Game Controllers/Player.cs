@@ -3,6 +3,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using System;
+using System.Collections;
 
 // Classe responsável por controlar o jogador
 public class Player : MonoBehaviour
@@ -71,6 +72,8 @@ public class Player : MonoBehaviour
     // MÉTODOS UNITY
     // =========================
 
+    private float intervalo = 1.0f; // Tempo em segundos
+    
     void Start()
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
@@ -78,8 +81,46 @@ public class Player : MonoBehaviour
 
         bool isBoardConnected = Wii.IsActive(remoteIndex) && Wii.GetExpType(remoteIndex) == 3;
         manualMode = !isBoardConnected;
+        
+        // fazer a conecção com o banco..
+        
+        // Inicia a rotina repetitiva..
+        StartCoroutine(ExecutarAcaoRepetitiva());
+    }
+    
+    IEnumerator ExecutarAcaoRepetitiva()
+    {
+        while (true)
+        {
+            // Executa a sua sub-rotina aqui
+            MinhaSubRotina();
+
+            // Espera pelo tempo determinado antes de continuar o loop
+            yield return new WaitForSeconds(intervalo);
+        }
     }
 
+    void MinhaSubRotina()
+    {
+        Debug.Log("Sub-rotina executada via Corrotina às: " + Time.time);
+        
+        Vector4 sensors = Wii.GetBalanceBoard(remoteIndex);
+
+        if (Wii.GetExpType(remoteIndex) == 3)
+        {
+            // Lado Esquerdo = Superior Esquerdo + Inferior Esquerdo
+            float pesoEsquerda = sensors.y + sensors.w; 
+            // Lado Direito = Superior Direito + Inferior Direito
+            float pesoDireita = sensors.x + sensors.z;  
+            
+            Debug.Log("Peso Esquerda: "+pesoEsquerda);
+            Debug.Log("peso Direita: "+pesoDireita);
+            
+            // adicionar valores a tabela do banco de dados do usuario associado a o jogo atual
+        }
+
+    }
+    
     void Update()
     {
         if (SD_Serial._connected) 
@@ -88,13 +129,32 @@ public class Player : MonoBehaviour
         }
         else if (Wii.IsActive(remoteIndex))
         {
+           // Debug.Log("Esta ativo"+Wii.IsActive(remoteIndex));
+            
             NintendoBalanceBoardMove();
+            
+            
+            /*
+            Vector4 sensors = Wii.GetBalanceBoard(remoteIndex);
+
+            if (Wii.GetExpType(remoteIndex) == 3)
+            {
+                // Lado Esquerdo = Superior Esquerdo + Inferior Esquerdo
+                float pesoEsquerda = sensors.y + sensors.w; 
+                // Lado Direito = Superior Direito + Inferior Direito
+                float pesoDireita = sensors.x + sensors.z;  
+                Debug.Log("Peso Esquerda: "+pesoEsquerda);
+                Debug.Log("peso Direita: "+pesoDireita);
+            }
+            */
+
         }
         else if (manualMode)
         {
             KeyboardMove();
         }
     }
+    
 
     void SDBalanceMove()
     {
@@ -278,13 +338,13 @@ public class Player : MonoBehaviour
         // Lado Direito = Superior Direito + Inferior Direito
         float pesoDireita = sensors.x + sensors.z;  
 
-        Debug.Log(pesoEsquerda);
-        
+       // Debug.Log("Peso Referencia: "+pesoReferencia);
+       // Debug.Log("Peso Esquerda: "+pesoEsquerda);
+       // Debug.Log("peso Direita: "+pesoDireita);
+
         // 4. Aplica a movimentação baseada nas forças reais calculadas
         if (pesoEsquerda > threshold)
         {
-            
-            
             movement = new Vector2(-1, 0); // Move para a esquerda
             if (facingRight) Flip();
         }
@@ -299,7 +359,7 @@ public class Player : MonoBehaviour
         }
 
         // Log detalhado para você acompanhar no console se os lados estão registrando os quilos corretamente
-       // Debug.Log($"[WII BOARD] Peso Calibrado Ref: {pesoReferencia:F2}kg | Esquerda: {pesoEsquerda:F2}kg (Limiar: >{threshold:F2}kg) | Direita: {pesoDireita:F2}kg (Limiar: >{threshold:F2}kg)");
+        //Debug.Log($"[WII BOARD] Peso Calibrado Ref: {pesoReferencia:F2}kg | Esquerda: {pesoEsquerda:F2}kg (Limiar: >{threshold:F2}kg) | Direita: {pesoDireita:F2}kg (Limiar: >{threshold:F2}kg)");
     }
 }
 }

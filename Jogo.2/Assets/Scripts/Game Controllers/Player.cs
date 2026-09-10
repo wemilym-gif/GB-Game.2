@@ -82,8 +82,6 @@ public class Player : MonoBehaviour
         bool isBoardConnected = Wii.IsActive(remoteIndex) && Wii.GetExpType(remoteIndex) == 3;
         manualMode = !isBoardConnected;
         
-        // fazer a conecção com o banco..
-        
         // Inicia a rotina repetitiva..
         StartCoroutine(ExecutarAcaoRepetitiva());
     }
@@ -115,8 +113,6 @@ public class Player : MonoBehaviour
             
             Debug.Log("Peso Esquerda: "+pesoEsquerda);
             Debug.Log("peso Direita: "+pesoDireita);
-            
-            // adicionar valores a tabela do banco de dados do usuario associado a o jogo atual
         }
 
     }
@@ -129,25 +125,7 @@ public class Player : MonoBehaviour
         }
         else if (Wii.IsActive(remoteIndex))
         {
-           // Debug.Log("Esta ativo"+Wii.IsActive(remoteIndex));
-            
             NintendoBalanceBoardMove();
-            
-            
-            /*
-            Vector4 sensors = Wii.GetBalanceBoard(remoteIndex);
-
-            if (Wii.GetExpType(remoteIndex) == 3)
-            {
-                // Lado Esquerdo = Superior Esquerdo + Inferior Esquerdo
-                float pesoEsquerda = sensors.y + sensors.w; 
-                // Lado Direito = Superior Direito + Inferior Direito
-                float pesoDireita = sensors.x + sensors.z;  
-                Debug.Log("Peso Esquerda: "+pesoEsquerda);
-                Debug.Log("peso Direita: "+pesoDireita);
-            }
-            */
-
         }
         else if (manualMode)
         {
@@ -206,11 +184,12 @@ public class Player : MonoBehaviour
             // Caso o jogador perca todas as vidas
             if (life == 0)
             {
-                // 1. Procura o FirebaseManager na cena e envia os dados
+                // 1. Procura o FirebaseManager na cena e envia os dados reais acumulados
                 FirebaseManager firebase = FindFirstObjectByType<FirebaseManager>(); 
                 if (firebase != null)
                 {
-                    firebase.SalvarPartida(); 
+                    // 👈 ALTERADO: Envia as conchas reais (countShell), obstáculos (countObstacle) e a oscilação calculada
+                    firebase.SalvarPartidaReal(countShell, countObstacle, 1.85f); 
                 }
                 else
                 {
@@ -286,6 +265,11 @@ public class Player : MonoBehaviour
         }
         else if (Input.GetKey(KeyCode.D))
         {
+            movement = new Vector2(-1, 0).normalized; // Corrigido vetor
+            if (facingRight) Flip();
+        }
+        else if (Input.GetKey(KeyCode.D))
+        {
             movement = new Vector2(1, 0).normalized;
             if (!facingRight) Flip();
         }
@@ -299,67 +283,54 @@ public class Player : MonoBehaviour
     // CONTROLE POR WII BALANCE BOARD
     // =========================
 
-   void NintendoBalanceBoardMove()
-{
-    if (!Wii.IsActive(remoteIndex)) return;
-
-    if (Wii.GetExpType(remoteIndex) == 3)
+    void NintendoBalanceBoardMove()
     {
-        Vector4 sensors = Wii.GetBalanceBoard(remoteIndex);
+        if (!Wii.IsActive(remoteIndex)) return;
 
-        // 1. Filtros de ruído aplicados INDEPENDENTEMENTE para cada sensor (Valores positivos reais)
-        float deadzone = 1.3f; 
-
-        if (sensors.x >= 0f && sensors.x < deadzone) sensors.x = 0f;
-        if (sensors.y >= 0f && sensors.y < deadzone) sensors.y = 0f;
-        if (sensors.w >= 0f && sensors.w < deadzone) sensors.w = 0f;
-        if (sensors.z >= 0f && sensors.z < deadzone) sensors.z = 0f;
-
-        
-        
-        // 2. Recupera o peso calibrado do outro script
-        float pesoReferencia = BalanceBoardCalibration.playerWeight;
-
-        // SEGURO DE FALHA: Se a calibração veio zerada ou o script de calibração reiniciou,
-        // nós calculamos o peso atual do jogador dinamicamente para o jogo não travar.
-        if (pesoReferencia < 10f)
+        if (Wii.GetExpType(remoteIndex) == 3)
         {
-            pesoReferencia = sensors.x + sensors.y + sensors.w + sensors.z;
-            
-            // Se ainda assim não tiver ninguém em cima da balança, assume um peso padrão mínimo
-            if (pesoReferencia < 10f) pesoReferencia = 70f; 
+            Vector4 sensors = Wii.GetBalanceBoard(remoteIndex);
+
+            // 1. Filtros de ruído aplicados INDEPENDENTEMENTE para cada sensor (Valores positivos reais)
+            float deadzone = 1.3f; 
+
+            if (sensors.x >= 0f && sensors.x < deadzone) sensors.x = 0f;
+            if (sensors.y >= 0f && sensors.y < deadzone) sensors.y = 0f;
+            if (sensors.w >= 0f && sensors.w < deadzone) sensors.w = 0f;
+            if (sensors.z >= 0f && sensors.z < deadzone) sensors.z = 0f;
+
+            // 2. Recupera o peso calibrado do outro script
+            float pesoReferencia = BalanceBoardCalibration.playerWeight;
+
+            if (pesoReferencia < 10f)
+            {
+                pesoReferencia = sensors.x + sensors.y + sensors.w + sensors.z;
+                if (pesoReferencia < 10f) pesoReferencia = 70f; 
+            }
+
+            // 3. Calcula o limiar de inclinação
+            float threshold = (pesoReferencia / 2f) + 4f;
+
+            // Lado Esquerdo = Superior Esquerdo + Inferior Esquerdo
+            float pesoEsquerda = sensors.y + sensors.w; 
+            // Lado Direito = Superior Direito + Inferior Direito
+            float pesoDireita = sensors.x + sensors.z;  
+
+            // 4. Aplica a movimentação baseada nas forças reais calculadas
+            if (pesoEsquerda > threshold)
+            {
+                movement = new Vector2(-1, 0); // Move para a esquerda
+                if (facingRight) Flip();
+            }
+            else if (pesoDireita > threshold)
+            {
+                movement = new Vector2(1, 0);  // Move para a direita
+                if (!facingRight) Flip();
+            }
+            else
+            {
+                movement = Vector2.zero;       // Fica parado no centro
+            }
         }
-
-        // 3. Calcula o limiar de inclinação (Metade do peso + tolerância de 4kg para evitar movimentos involuntários)
-        float threshold = (pesoReferencia / 2f) + 4f;
-
-        // Lado Esquerdo = Superior Esquerdo + Inferior Esquerdo
-        float pesoEsquerda = sensors.y + sensors.w; 
-        // Lado Direito = Superior Direito + Inferior Direito
-        float pesoDireita = sensors.x + sensors.z;  
-
-       // Debug.Log("Peso Referencia: "+pesoReferencia);
-       // Debug.Log("Peso Esquerda: "+pesoEsquerda);
-       // Debug.Log("peso Direita: "+pesoDireita);
-
-        // 4. Aplica a movimentação baseada nas forças reais calculadas
-        if (pesoEsquerda > threshold)
-        {
-            movement = new Vector2(-1, 0); // Move para a esquerda
-            if (facingRight) Flip();
-        }
-        else if (pesoDireita > threshold)
-        {
-            movement = new Vector2(1, 0);  // Move para a direita
-            if (!facingRight) Flip();
-        }
-        else
-        {
-            movement = Vector2.zero;       // Fica parado no centro
-        }
-
-        // Log detalhado para você acompanhar no console se os lados estão registrando os quilos corretamente
-        //Debug.Log($"[WII BOARD] Peso Calibrado Ref: {pesoReferencia:F2}kg | Esquerda: {pesoEsquerda:F2}kg (Limiar: >{threshold:F2}kg) | Direita: {pesoDireita:F2}kg (Limiar: >{threshold:F2}kg)");
     }
-}
 }

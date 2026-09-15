@@ -1,8 +1,9 @@
- using Firebase;
+using Firebase;
 using Firebase.Auth; 
 using Firebase.Database;
 using Firebase.Extensions; 
 using UnityEngine;
+using UnityEngine.SceneManagement; // Importante para mudar de cena!
 using TMPro; 
 using System;
 
@@ -28,9 +29,12 @@ public class FirebaseManager : MonoBehaviour
     private FirebaseAuth auth; 
     private FirebaseUser usuarioLogado; 
 
-    [Header("Campos do Canvas de Login")]
+    [Header("Campos do Canvas de Login / Cadastro")]
     public TMP_InputField emailInputField; 
     public TMP_InputField senhaInputField; 
+
+    [Header("Configuração de Cena")]
+    public string nomeCenaCalibracao = "Calibracao"; // Digite o nome exato da sua cena aqui
 
     void Start() {
         FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task => {
@@ -42,6 +46,31 @@ public class FirebaseManager : MonoBehaviour
             } else {
                 Debug.LogError($"Não foi possível inicializar o Firebase: {dependencyStatus}");
             }
+        });
+    }
+
+    // Função para Cadastrar um Novo Paciente (Criar Conta) e ir para a Calibração
+    public void CadastrarPaciente() {
+        if (auth == null) return;
+        if (emailInputField == null || senhaInputField == null) {
+            Debug.LogError("Erro: Arraste os campos de texto no Inspector!");
+            return;
+        }
+
+        string emailInput = emailInputField.text;
+        string senhaInput = senhaInputField.text;
+
+        auth.CreateUserWithEmailAndPasswordAsync(emailInput, senhaInput).ContinueWithOnMainThread(task => {
+            if (task.IsFaulted) {
+                Debug.LogError("Erro ao cadastrar! Verifique se a senha tem no mínimo 6 caracteres ou se o e-mail já existe.");
+                return;
+            }
+
+            usuarioLogado = task.Result.User;
+            Debug.Log($"🎉 Paciente cadastrado com sucesso! ID: {usuarioLogado.UserId}");
+
+            // Transição automática para a cena de calibração após o cadastro
+            IrParaCalibracao();
         });
     }
 
@@ -63,7 +92,19 @@ public class FirebaseManager : MonoBehaviour
             }
             usuarioLogado = task.Result.User;
             Debug.Log($"Sucesso! Paciente logado com ID: {usuarioLogado.UserId}");
+
+            // Transição para a cena de calibração após o login
+            IrParaCalibracao();
         });
+    }
+
+    // Função pública para trocar de cena (pode ser chamada diretamente por um botão)
+    public void IrParaCalibracao() {
+        if (!string.IsNullOrEmpty(nomeCenaCalibracao)) {
+            SceneManager.LoadScene(nomeCenaCalibracao);
+        } else {
+            Debug.LogError("Nome da cena de calibração não foi configurado!");
+        }
     }
 
     // Função chamada quando a partida REAL termina
@@ -77,7 +118,6 @@ public class FirebaseManager : MonoBehaviour
         DadosSessao novaSessao = new DadosSessao(pontosFinais, totalColisoes, oscilacaoCalculada);
         string json = JsonUtility.ToJson(novaSessao);
 
-        // Cria uma chave com a data e hora atual do salvamento
         string chaveDataHora = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
         reference.Child("jogadores")

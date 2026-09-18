@@ -70,7 +70,7 @@ public class FirebaseManager : MonoBehaviour
             Debug.Log($"🎉 Paciente cadastrado com sucesso! ID: {usuarioLogado.UserId}");
 
             // Transição automática para a cena de calibração após o cadastro
-            IrParaCalibracao();
+            IrParaConfigBoard();
         });
     }
 
@@ -94,16 +94,20 @@ public class FirebaseManager : MonoBehaviour
             Debug.Log($"Sucesso! Paciente logado com ID: {usuarioLogado.UserId}");
 
             // Transição para a cena de calibração após o login
-            IrParaCalibracao();
+            IrParaConfigBoard();
         });
     }
 
-    // Função pública para trocar de cena (pode ser chamada diretamente por um botão)
-    public void IrParaCalibracao() {
-        if (!string.IsNullOrEmpty(nomeCenaCalibracao)) {
-            SceneManager.LoadScene(nomeCenaCalibracao);
+    
+    [Header("Configuração de Cena")]
+    public string nomeCenaConfig = "Config - Wii Board";
+
+    public void IrParaConfigBoard() {
+        if (!string.IsNullOrEmpty(nomeCenaConfig)) {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(nomeCenaConfig);
         } else {
-            Debug.LogError("Nome da cena de calibração não foi configurado!");
+            Debug.LogError("Nome da cena não configurado!");
         }
     }
 

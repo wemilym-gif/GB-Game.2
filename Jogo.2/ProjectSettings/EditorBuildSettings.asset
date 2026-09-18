@@ -11,18 +11,18 @@ EditorBuildSettings:
   - enabled: 1
     path: "Assets/Scenes/sele\xE7\xE3o de perfil.unity"
     guid: e37528f12da2b24489118401590def63
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Menu.unity
     guid: 2bd927db7b63f8c48b9eacc30053b6dd
+  - enabled: 1
+    path: Assets/Scenes/Wii Board/Config - Wii Board.unity
+    guid: d1c455e17a27a994fa505ae65c3a8d9e
   - enabled: 1
     path: "Assets/Scenes/Wii Board/Calibra\xE7\xE3o - Wii Board.unity"
     guid: 3d022c01ae2d18947a408fc4047286a0
   - enabled: 1
     path: Assets/Scenes/Jogo.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
-  - enabled: 1
-    path: Assets/Scenes/Wii Board/Config - Wii Board.unity
-    guid: d1c455e17a27a994fa505ae65c3a8d9e
   - enabled: 1
     path: Assets/Scenes/Pause.unity
     guid: f9e22c7deeb8525438301be51cb55d65

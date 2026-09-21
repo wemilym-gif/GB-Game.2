@@ -315,9 +315,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Sair
-
-'
+  m_text: continuar
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5ca22e8bfcd5ae24cbdb3936c75b9351, type: 2}
   m_sharedMaterial: {fileID: -7396751640442099034, guid: 5ca22e8bfcd5ae24cbdb3936c75b9351, type: 2}
@@ -1876,6 +1874,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1938377433}
   m_CullTransparentMesh: 1
+--- !u!1001 &1965929524
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6621595815462704000, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_Name
+      value: Firebasemaneger
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.42318
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.55976
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
 --- !u!1 &2048071503
 GameObject:
   m_ObjectHideFlags: 0
@@ -1889,7 +1944,7 @@ GameObject:
   - component: {fileID: 2048071506}
   - component: {fileID: 2048071505}
   m_Layer: 5
-  m_Name: Exit
+  m_Name: continuar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1912,8 +1967,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 542, y: -320}
-  m_SizeDelta: {x: 300.0842, y: 90}
+  m_AnchoredPosition: {x: 394, y: -233.24}
+  m_SizeDelta: {x: 392.8061, y: 103.522}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2048071505
 MonoBehaviour:
@@ -2018,3 +2073,4 @@ SceneRoots:
   - {fileID: 1537946598}
   - {fileID: 948015866}
   - {fileID: 1211782152}
+  - {fileID: 1965929524}

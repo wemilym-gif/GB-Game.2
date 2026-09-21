@@ -72,7 +72,7 @@ public class ButtonController : MonoBehaviour
         Time.timeScale = 1f;
 
        
-        ICommand quit = new LoadSceneCommand("Menu");
+        ICommand quit = new LoadSceneCommand("Calibração - Wii Board");
         quit.Execute();
     } 
 }

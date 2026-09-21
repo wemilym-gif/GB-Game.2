@@ -322,7 +322,7 @@ BoxCollider2D:
   m_EdgeRadius: 0
 --- !u!212 &119888422
 SpriteRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -379,6 +379,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!4 &119888423
 Transform:
   m_ObjectHideFlags: 0
@@ -490,7 +491,7 @@ GameObject:
   m_IsActive: 1
 --- !u!212 &284403669
 SpriteRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -547,6 +548,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!4 &284403670
 Transform:
   m_ObjectHideFlags: 0
@@ -1086,6 +1088,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -1151,9 +1154,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ComponentVersion: 2
+  m_ComponentVersion: 4
   m_LightType: 4
   m_BlendStyleIndex: 0
+  m_Light2DProvider:
+    rid: -2
+  m_SelectionSources:
+    rid: 2508289978451361867
   m_FalloffIntensity: 0.5
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
@@ -1191,6 +1198,19 @@ MonoBehaviour:
   - {x: 0.5, y: -0.5, z: 0}
   - {x: 0.5, y: 0.5, z: 0}
   - {x: -0.5, y: 0.5, z: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2508289978451361867
+      type: {class: Light2DProviderSources, ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.2D.Runtime}
+      data:
+        m_SelectedHashCode: 4
+        m_SelectedSource:
+          rid: -2
+        m_Provider2DCache:
+          rid: -2
 --- !u!4 &619394802
 Transform:
   m_ObjectHideFlags: 0
@@ -1542,7 +1562,7 @@ BoxCollider2D:
   m_EdgeRadius: 0
 --- !u!212 &716999012
 SpriteRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1599,6 +1619,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!4 &716999013
 Transform:
   m_ObjectHideFlags: 0
@@ -2255,7 +2276,7 @@ GameObject:
   m_IsActive: 1
 --- !u!212 &1058876565
 SpriteRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2312,6 +2333,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!4 &1058876566
 Transform:
   m_ObjectHideFlags: 0
@@ -2525,7 +2547,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90.32}
 --- !u!212 &1213782725
 SpriteRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2582,6 +2604,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!70 &1213782726
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -3887,6 +3910,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1895735671}
   m_CullTransparentMesh: 1
+--- !u!1001 &1918977361
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6621595815462704000, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_Name
+      value: Firebasemaneger
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.42318
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.55976
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7425971456622797106, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 083989ec8e1558f4ea0b3f52231e828d, type: 3}
 --- !u!1 &1963282739
 GameObject:
   m_ObjectHideFlags: 0
@@ -4028,7 +4108,7 @@ BoxCollider2D:
   m_EdgeRadius: 0
 --- !u!212 &2092259707
 SpriteRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -4085,6 +4165,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!4 &2092259708
 Transform:
   m_ObjectHideFlags: 0
@@ -4220,3 +4301,4 @@ SceneRoots:
   - {fileID: 2092259708}
   - {fileID: 600536158}
   - {fileID: 284403670}
+  - {fileID: 1918977361}

@@ -111,10 +111,9 @@ public class Player : MonoBehaviour
             // Lado Direito = Superior Direito + Inferior Direito
             float pesoDireita = sensors.x + sensors.z;  
             
-            Debug.Log("Peso Esquerda: "+pesoEsquerda);
-            Debug.Log("peso Direita: "+pesoDireita);
+            Debug.Log("Peso Esquerda: " + pesoEsquerda);
+            Debug.Log("Peso Direita: " + pesoDireita);
         }
-
     }
     
     void Update()
@@ -132,7 +131,6 @@ public class Player : MonoBehaviour
             KeyboardMove();
         }
     }
-    
 
     void SDBalanceMove()
     {
@@ -166,13 +164,13 @@ public class Player : MonoBehaviour
     }
 
     // =========================
-    // COLISÕES
+    // COLISÕES E FIM DE JOGO
     // =========================
 
     void OnTriggerEnter2D(Collider2D collision)
     {
         // Caso colida com um obstáculo
-        if (collision.gameObject.tag == "Obstacle")
+        if (collision.gameObject.CompareTag("Obstacle"))
         {
             camera.GetComponent<Tremor>().playTremor();
             life--;
@@ -184,23 +182,65 @@ public class Player : MonoBehaviour
             // Caso o jogador perca todas as vidas
             if (life == 0)
             {
-                // 1. Procura o FirebaseManager na cena e envia os dados reais acumulados
-                FirebaseManager firebase = FindFirstObjectByType<FirebaseManager>(); 
-                if (firebase != null)
+                // 1. Captura os valores dos 4 quadrantes da balança no instante da derrota
+                float supEsq = 0f, supDir = 0f, infEsq = 0f, infDir = 0f;
+
+                if (Wii.IsActive(remoteIndex) && Wii.GetExpType(remoteIndex) == 3)
                 {
-                    // 👈 ALTERADO: Envia as conchas reais (countShell), obstáculos (countObstacle) e a oscilação calculada
-                    firebase.SalvarPartidaReal(countShell, countObstacle, 1.85f); 
+                    Vector4 sensoresFinais = Wii.GetBalanceBoard(remoteIndex);
+                    supEsq = sensoresFinais.y; // Superior Esquerdo
+                    supDir = sensoresFinais.x; // Superior Direito
+                    infEsq = sensoresFinais.w; // Inferior Esquerdo
+                    infDir = sensoresFinais.z; // Inferior Direito
+                }
+                else if (SD_Serial._connected && _sd_serial != null)
+                {
+                    supEsq = _sd_serial.A;
+                    supDir = _sd_serial.B;
+                    infEsq = _sd_serial.C;
+                    infDir = _sd_serial.D;
+                }
+
+                // 2. Envia a partida completa para o Firebase
+                if (FirebaseManager.Instance != null)
+                {
+                    FirebaseManager.Instance.SalvarPartidaReal(
+                        countShell,     // Pontuação (conchas)
+                        countObstacle,  // Colisões
+                        1.85f,          // Oscilação média
+                        supEsq, 
+                        supDir, 
+                        infEsq, 
+                        infDir
+                    );
                 }
                 else
                 {
-                    Debug.LogWarning("FirebaseManager não foi encontrado na cena!");
+                    // Fallback caso o Singleton não esteja instanciado
+                    FirebaseManager firebase = FindFirstObjectByType<FirebaseManager>();
+                    if (firebase != null)
+                    {
+                        firebase.SalvarPartidaReal(
+                            countShell, 
+                            countObstacle, 
+                            1.85f, 
+                            supEsq, 
+                            supDir, 
+                            infEsq, 
+                            infDir
+                        );
+                    }
+                    else
+                    {
+                        Debug.LogWarning("FirebaseManager não foi encontrado na cena!");
+                    }
                 }
 
-                // 2. Telas e congelamento do jogo
+                // 3. Telas e congelamento do jogo
                 Time.timeScale = 0f;
                 gameOverScreen.SetActive(true);
 
-                // 3. Desativa componentes para simular o sumiço do Player sem quebrá-lo
+                // 4. Desativa componentes para simular o sumiço do Player sem quebrá-lo
                 GetComponent<SpriteRenderer>().enabled = false; 
                 this.enabled = false; 
             }
@@ -261,11 +301,6 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.A))
         {
             movement = new Vector2(-1, 0).normalized;
-            if (facingRight) Flip();
-        }
-        else if (Input.GetKey(KeyCode.D))
-        {
-            movement = new Vector2(-1, 0).normalized; // Corrigido vetor
             if (facingRight) Flip();
         }
         else if (Input.GetKey(KeyCode.D))

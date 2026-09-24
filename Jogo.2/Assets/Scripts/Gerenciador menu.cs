@@ -6,8 +6,9 @@ public class GerenciadorMenu : MonoBehaviour
     public GameObject painelLoginPaciente;
     public GameObject painelCadastroPaciente;
 
-    [Header("Botões do Menu Principal")]
+    [Header("Botões da Praia (Menu Principal)")]
     public GameObject botaoLoginPrincipal;
+    public GameObject botaoCadastroPrincipal; // Adicionado para esconder a madeira de cadastro
 
     // Ação: Abrir o Painel de Cadastro
     public void AbrirCadastroPaciente()
@@ -15,8 +16,8 @@ public class GerenciadorMenu : MonoBehaviour
         if (painelCadastroPaciente != null) painelCadastroPaciente.SetActive(true);
         if (painelLoginPaciente != null) painelLoginPaciente.SetActive(false);
         
-        // Esconde o botão de Login enquanto estiver no cadastro
-        if (botaoLoginPrincipal != null) botaoLoginPrincipal.SetActive(false);
+        // Esconde AMBOS os botões da praia
+        EsconderBotoesPrincipais();
     }
 
     // Ação: Abrir o Painel de Login
@@ -25,8 +26,8 @@ public class GerenciadorMenu : MonoBehaviour
         if (painelLoginPaciente != null) painelLoginPaciente.SetActive(true);
         if (painelCadastroPaciente != null) painelCadastroPaciente.SetActive(false);
         
-        // Mantém o botão de Login visível na tela de login
-        if (botaoLoginPrincipal != null) botaoLoginPrincipal.SetActive(true);
+        // Esconde AMBOS os botões da praia (corrige o botão 'cadastro' sobreposto)
+        EsconderBotoesPrincipais();
     }
 
     // Ação: Voltar ao Menu Principal (Botão da Setinha)
@@ -35,7 +36,15 @@ public class GerenciadorMenu : MonoBehaviour
         if (painelLoginPaciente != null) painelLoginPaciente.SetActive(false);
         if (painelCadastroPaciente != null) painelCadastroPaciente.SetActive(false);
 
-        // Garante que o botão de Login volte a aparecer no menu inicial
+        // Reativa os dois botões na praia para a tela inicial
         if (botaoLoginPrincipal != null) botaoLoginPrincipal.SetActive(true);
+        if (botaoCadastroPrincipal != null) botaoCadastroPrincipal.SetActive(true);
+    }
+
+    // Função auxiliar para limpar a tela
+    private void EsconderBotoesPrincipais()
+    {
+        if (botaoLoginPrincipal != null) botaoLoginPrincipal.SetActive(false);
+        if (botaoCadastroPrincipal != null) botaoCadastroPrincipal.SetActive(false);
     }
 }

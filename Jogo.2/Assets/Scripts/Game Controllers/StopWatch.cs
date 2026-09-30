@@ -68,7 +68,7 @@ public class StopWatch : MonoBehaviour, ITimeSubject
     {
         activeTime = false;
 
-        // 1. Salva os dados no Firebase
+        // 1. Salva os dados da partida no Firebase
         FinalizarESalvarPartida();
 
         // 2. Exibe a tela de Game Over e Pausa o jogo
@@ -82,28 +82,11 @@ public class StopWatch : MonoBehaviour, ITimeSubject
     {
         if (gameOverScreen != null)
         {
+            // Ativa a tela (O GameOverDisplay irá disparar o OnEnable() e buscar os dados continuamente)
             gameOverScreen.SetActive(true);
-
-            // Usa Corrotina com tempo REAL para funcionar mesmo com Time.timeScale = 0
-            StartCoroutine(AguardarECarregarFirebase());
         }
 
         Time.timeScale = 0f; // Pausa o jogo
-    }
-
-    private System.Collections.IEnumerator AguardarECarregarFirebase()
-    {
-        // Aguarda 1 segundo em tempo real (sem ser afetado pela pausa do jogo)
-        yield return new WaitForSecondsRealtime(1.0f);
-
-        if (gameOverScreen != null)
-        {
-            GameOverDisplay display = gameOverScreen.GetComponent<GameOverDisplay>();
-            if (display != null)
-            {
-                display.CarregarDadosDaUltimaPartida();
-            }
-        }
     }
 
     private void FinalizarESalvarPartida()
@@ -111,18 +94,15 @@ public class StopWatch : MonoBehaviour, ITimeSubject
         if (partidaSalva) return;
         partidaSalva = true;
 
-      
         int pontuacaoAtual = 0; 
         int colisoesAtuais = 0;   
         float oscilacaoCalculada = 0f;  
 
-        
         float pressaoSuperiorEsquerdo = 0f;
         float pressaoSuperiorDireito  = 0f;
         float pressaoInferiorEsquerdo = 0f;
         float pressaoInferiorDireito  = 0f;
 
-      
         if (FirebaseManager.Instance != null)
         {
             FirebaseManager.Instance.SalvarPartidaReal(

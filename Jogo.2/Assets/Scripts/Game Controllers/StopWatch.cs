@@ -5,19 +5,22 @@ using UnityEngine.UI;
 
 public class StopWatch : MonoBehaviour, ITimeSubject
 {
+    [Header("UI & Referências")]
     public TMP_Text textTimeHud;
     public GameObject player;
     public GameObject gameOverScreen;
 
+    [Header("Configurações de Cor do Tempo")]
     public Color normalColor = Color.white;
     public Color alertColor = Color.red;
 
+    [Header("Configurações de Tempo")]
     private static float startTime = 120f;
     private static float restTime;
     public float tempoDeAviso = 11f;
 
     private bool activeTime = true;
-    private bool partidaSalva = false; // 👈 Trava para salvar apenas uma vez no Firebase
+    private bool partidaSalva = false; // Trava para salvar apenas uma vez no Firebase
 
     private List<ITimeObserver> observers = new List<ITimeObserver>();
 
@@ -25,20 +28,21 @@ public class StopWatch : MonoBehaviour, ITimeSubject
     {
         restTime = startTime;
         partidaSalva = false;
+        Time.timeScale = 1f; // Garante que o tempo volte ao normal ao reiniciar a cena
     }
 
     void Update()
     {
         if (!activeTime) return;
 
+        // Caso o jogador morra/desapareça da cena
         if (player == null)
         {
-            activeTime = false;
-            FinalizarESalvarPartida();
-            NotifyTimeEnded();
+            FinalizarEExibirGameOver();
             return;
         }
 
+        // Contagem regressiva do tempo
         if (restTime > 0)
         {
             restTime -= Time.deltaTime;
@@ -56,13 +60,49 @@ public class StopWatch : MonoBehaviour, ITimeSubject
             textTimeHud.text = "00:00";
             textTimeHud.color = alertColor;
 
-            activeTime = false;
-            FinalizarESalvarPartida(); // 👈 Salva os dados no Firebase ao zerar o tempo
+            FinalizarEExibirGameOver();
+        }
+    }
 
-            Time.timeScale = 0f;
+    private void FinalizarEExibirGameOver()
+    {
+        activeTime = false;
+
+        // 1. Salva os dados no Firebase
+        FinalizarESalvarPartida();
+
+        // 2. Exibe a tela de Game Over e Pausa o jogo
+        ExibirGameOver();
+
+        // 3. Notifica os observadores do evento de fim do tempo
+        NotifyTimeEnded();
+    }
+
+    private void ExibirGameOver()
+    {
+        if (gameOverScreen != null)
+        {
             gameOverScreen.SetActive(true);
 
-            NotifyTimeEnded();
+            // Usa Corrotina com tempo REAL para funcionar mesmo com Time.timeScale = 0
+            StartCoroutine(AguardarECarregarFirebase());
+        }
+
+        Time.timeScale = 0f; // Pausa o jogo
+    }
+
+    private System.Collections.IEnumerator AguardarECarregarFirebase()
+    {
+        // Aguarda 1 segundo em tempo real (sem ser afetado pela pausa do jogo)
+        yield return new WaitForSecondsRealtime(1.0f);
+
+        if (gameOverScreen != null)
+        {
+            GameOverDisplay display = gameOverScreen.GetComponent<GameOverDisplay>();
+            if (display != null)
+            {
+                display.CarregarDadosDaUltimaPartida();
+            }
         }
     }
 
@@ -71,24 +111,28 @@ public class StopWatch : MonoBehaviour, ITimeSubject
         if (partidaSalva) return;
         partidaSalva = true;
 
-        // Exemplo obtendo pontuação/moedas do sistema do jogo
+      
         int pontuacaoAtual = 0; 
-        int colisoesAtuais = 0;
-        float oscilacaoCalculada = 0f;
+        int colisoesAtuais = 0;   
+        float oscilacaoCalculada = 0f;  
 
-        // Sensores da balança (substitua pelas variáveis reais da Wii Balance Board do UniWii)
-        float se = 0f; // Superior Esquerdo
-        float sd = 0f; // Superior Direito
-        float ie = 0f; // Inferior Esquerdo
-        float id = 0f; // Inferior Direito
+        
+        float pressaoSuperiorEsquerdo = 0f;
+        float pressaoSuperiorDireito  = 0f;
+        float pressaoInferiorEsquerdo = 0f;
+        float pressaoInferiorDireito  = 0f;
 
+      
         if (FirebaseManager.Instance != null)
         {
             FirebaseManager.Instance.SalvarPartidaReal(
                 pontuacaoAtual, 
                 colisoesAtuais, 
                 oscilacaoCalculada, 
-                se, sd, ie, id
+                pressaoSuperiorEsquerdo, 
+                pressaoSuperiorDireito, 
+                pressaoInferiorEsquerdo, 
+                pressaoInferiorDireito
             );
         }
     }

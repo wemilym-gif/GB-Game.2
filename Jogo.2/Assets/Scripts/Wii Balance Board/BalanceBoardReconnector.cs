@@ -5,39 +5,26 @@ using System.Reflection;
 
 public class BalanceBoardReconnector : MonoBehaviour
 {
-    // =========================
-    //      REFERÊNCIAS DE UI
-    // =========================
+    
     [Header("Referências de UI")]
-    public TMP_Text statusText;        // Texto que informa o status da reconexão
-    public GameObject reconnectButton; // Botão para tentar reconectar
-    public GameObject manualModePanel; // Painel exibido quando entra em modo manual
+    public TMP_Text statusText;        
+    public GameObject reconnectButton; 
+    public GameObject manualModePanel; 
 
-    // =========================
-    //  CONFIGURAÇÃO DA BALANÇA
-    // =========================
+   
     [Header("Configuração da Balance Board")]
-    public int remoteIndex = 0;        // Índice do Wii Remote associado à Balance Board
+    public int remoteIndex = 0;        
 
-    // Indica se uma tentativa de reconexão já está em andamento
+    
     private bool isTrying = false;
 
-    // =========================
-    //     BOTÃO DE RECONEXÃO
-    // =========================
-    // Método chamado pelo botão "Reconectar"
     public void ReconnectButton()
     {
-        // Evita múltiplas corrotinas simultâneas
+      
         if (!isTrying)
             StartCoroutine(ReconnectRoutine());
     }
 
-    // =========================
-    //   VERIFICAÇÃO POR REFLEXÃO
-    // =========================
-    // Confere se um método existe na DLL do Wii
-    // Isso evita crashes caso a versão da DLL não possua o método
     private bool HasMethod(string methodName)
     {
         var m = typeof(Wii).GetMethod(
@@ -47,15 +34,12 @@ public class BalanceBoardReconnector : MonoBehaviour
         return m != null;
     }
 
-    // =========================
-    //   ROTINA DE RECONEXÃO
-    // =========================
-    // Tenta reconectar a Balance Board em até 3 tentativas
+   
     private IEnumerator ReconnectRoutine()
     {
         isTrying = true;
 
-        // Desativa o botão durante a tentativa
+     
         reconnectButton.SetActive(false);
 
         statusText.text = "🔄 Tentando reconectar Balance Board...";
@@ -63,7 +47,7 @@ public class BalanceBoardReconnector : MonoBehaviour
 
         bool reconectou = false;
 
-        // Realiza até 3 tentativas
+       
         for (int tentativa = 1; tentativa <= 3; tentativa++)
         {
             Debug.Log($"Tentativa {tentativa} de reconexão...");
@@ -81,7 +65,7 @@ public class BalanceBoardReconnector : MonoBehaviour
 
             yield return new WaitForSeconds(0.5f);
 
-            // 2️⃣ Libera conexões antigas do Wii Remote
+          
             if (HasMethod("DropWiiRemote"))
             {
                 try

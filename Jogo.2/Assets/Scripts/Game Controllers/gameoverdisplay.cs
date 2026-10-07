@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using UnityEngine;
 using TMPro;
 using Firebase.Database;
@@ -23,15 +24,14 @@ public class GameOverDisplay : MonoBehaviour
 
     private DatabaseReference dbRef;
     private bool dadosCarregados = false;
+    private bool buscandoDados = false;
 
     void OnEnable()
     {
         dadosCarregados = false;
+        buscandoDados = false;
         
-        // Exibe "Carregando..." enquanto aguarda a resposta do banco de dados
         ExibirTextoCarregando();
-
-        // Inicia a tentativa contínua de busca
         StartCoroutine(BuscarDadosAteSucesso());
     }
 
@@ -43,23 +43,26 @@ public class GameOverDisplay : MonoBehaviour
         if (textDataHora != null) textDataHora.text = "Data/Hora: Carregando...";
 
         if (textPressaoSuperiorEsquerdo != null) 
-            textPressaoSuperiorEsquerdo.text = "Pressão no quadrante Superior Esquerdo: Carregando...";
+            textPressaoSuperiorEsquerdo.text = "Pressão Sup. Esquerdo: Carregando...";
         if (textPressaoSuperiorDireito != null) 
-            textPressaoSuperiorDireito.text = "Pressão no quadrante Superior Direito: Carregando...";
+            textPressaoSuperiorDireito.text = "Pressão Sup. Direito: Carregando...";
         if (textPressaoInferiorEsquerdo != null) 
-            textPressaoInferiorEsquerdo.text = "Pressão no quadrante Inferior Esquerdo: Carregando...";
+            textPressaoInferiorEsquerdo.text = "Pressão Inf. Esquerdo: Carregando...";
         if (textPressaoInferiorDireito != null) 
-            textPressaoInferiorDireito.text = "Pressão no quadrante Inferior Direito: Carregando...";
+            textPressaoInferiorDireito.text = "Pressão Inf. Direito: Carregando...";
     }
 
     private IEnumerator BuscarDadosAteSucesso()
     {
-        dbRef = FirebaseDatabase.GetInstance(databaseUrl).RootReference;
+        // Aponta para a pasta 'partidas_recentes'
+        dbRef = FirebaseDatabase.GetInstance(databaseUrl).RootReference.Child("partidas_recentes");
 
-        // Enquanto os dados não forem carregados, tenta novamente a cada 1 segundo em tempo real
         while (!dadosCarregados)
         {
-            TentarCarregarFirebase();
+            if (!buscandoDados)
+            {
+                TentarCarregarFirebase();
+            }
             yield return new WaitForSecondsRealtime(1.0f);
         }
     }
@@ -68,11 +71,14 @@ public class GameOverDisplay : MonoBehaviour
     {
         if (dbRef == null) return;
 
-        dbRef.OrderByKey().LimitToLast(1).GetValueAsync().ContinueWithOnMainThread(task =>
-        {
+        buscandoDados = true;
+
+        dbRef.OrderByKey().LimitToLast(1).GetValueAsync().ContinueWithOnMainThread(task => {
+            buscandoDados = false;
+
             if (task.IsFaulted || task.IsCanceled)
             {
-                Debug.LogWarning("Aguardando resposta do Firebase...");
+                TentarCarregarRaizFallback();
                 return;
             }
 
@@ -80,49 +86,89 @@ public class GameOverDisplay : MonoBehaviour
 
             if (snapshot != null && snapshot.Exists && snapshot.ChildrenCount > 0)
             {
-                foreach (DataSnapshot partida in snapshot.Children)
+                ProcessarSnapshot(snapshot);
+            }
+            else
+            {
+                // Tenta a raiz caso a pasta 'partidas_recentes' ainda esteja vazia
+                TentarCarregarRaizFallback();
+            }
+        });
+    }
+
+    private void TentarCarregarRaizFallback()
+    {
+        var rootRef = FirebaseDatabase.GetInstance(databaseUrl).RootReference;
+        rootRef.GetValueAsync().ContinueWithOnMainThread(task => {
+            if (task.IsCompleted && task.Result != null && task.Result.Exists)
+            {
+                DataSnapshot ultimaPartida = null;
+                foreach (DataSnapshot child in task.Result.Children)
                 {
-                    // Lê as informações
-                    string pontuacao = partida.Child("pontuacao").Value?.ToString() ?? "0";
-                    string colisoes = partida.Child("colisoes").Value?.ToString() ?? "0";
-                    string dataHora = partida.Child("dataHora").Value?.ToString() ?? "-";
+                    // Ignora as pastas do sistema para pegar apenas os timestamps soltos na raiz
+                    if (child.Key != "jogadores" && child.Key != "partidas_recentes")
+                    {
+                        ultimaPartida = child;
+                    }
+                }
 
-                    float oscilacaoVal = ConvertToFloat(partida.Child("oscilacaoMedia").Value);
-
-                    float presSupEsq = ConvertToFloat(partida.Child("pressaoSuperiorEsquerdo").Value);
-                    float presSupDir = ConvertToFloat(partida.Child("pressaoSuperiorDireito").Value);
-                    float presInfEsq = ConvertToFloat(partida.Child("pressaoInferiorEsquerdo").Value);
-                    float presInfDir = ConvertToFloat(partida.Child("pressaoInferiorDireito").Value);
-
-                    // Preenche a UI com os dados reais
-                    if (textPontuacao != null) textPontuacao.text = $"Pontuação: {pontuacao}";
-                    if (textColisoes != null) textColisoes.text = $"Colisões: {colisoes}";
-                    if (textOscilacao != null) textOscilacao.text = $"Oscilação Média: {oscilacaoVal:F2}";
-                    if (textDataHora != null) textDataHora.text = $"Data/Hora: {dataHora}";
-
-                    if (textPressaoSuperiorEsquerdo != null) 
-                        textPressaoSuperiorEsquerdo.text = $"Pressão no quadrante Superior Esquerdo: {presSupEsq:F2}";
-
-                    if (textPressaoSuperiorDireito != null) 
-                        textPressaoSuperiorDireito.text = $"Pressão no quadrante Superior Direito: {presSupDir:F2}";
-
-                    if (textPressaoInferiorEsquerdo != null) 
-                        textPressaoInferiorEsquerdo.text = $"Pressão no quadrante Inferior Esquerdo: {presInfEsq:F2}";
-
-                    if (textPressaoInferiorDireito != null) 
-                        textPressaoInferiorDireito.text = $"Pressão no quadrante Inferior Direito: {presInfDir:F2}";
-
-                    // Marca que concluiu para parar o loop da corrotina
+                if (ultimaPartida != null)
+                {
+                    PreencherUI(ultimaPartida);
                     dadosCarregados = true;
                 }
             }
         });
     }
 
+    private void ProcessarSnapshot(DataSnapshot snapshot)
+    {
+        foreach (DataSnapshot partida in snapshot.Children)
+        {
+            PreencherUI(partida);
+            dadosCarregados = true;
+        }
+    }
+
+    private void PreencherUI(DataSnapshot partida)
+    {
+        string pontuacao = partida.Child("pontuacao").Value?.ToString() ?? "0";
+        string colisoes = partida.Child("colisoes").Value?.ToString() ?? "0";
+        string dataHora = partida.Child("dataHora").Value?.ToString() ?? "-";
+
+        float oscilacaoVal = ConvertToFloat(partida.Child("oscilacaoMedia").Value);
+
+        float presSupEsq = ConvertToFloat(partida.Child("pressaoSuperiorEsquerdo").Value);
+        float presSupDir = ConvertToFloat(partida.Child("pressaoSuperiorDireito").Value);
+        float presInfEsq = ConvertToFloat(partida.Child("pressaoInferiorEsquerdo").Value);
+        float presInfDir = ConvertToFloat(partida.Child("pressaoInferiorDireito").Value);
+
+        if (textPontuacao != null) textPontuacao.text = $"Pontuação: {pontuacao}";
+        if (textColisoes != null) textColisoes.text = $"Colisões: {colisoes}";
+        if (textOscilacao != null) textOscilacao.text = $"Oscilação Média: {oscilacaoVal:F2}";
+        if (textDataHora != null) textDataHora.text = $"Data/Hora: {dataHora}";
+
+        if (textPressaoSuperiorEsquerdo != null) 
+            textPressaoSuperiorEsquerdo.text = $"Pressão Sup. Esquerdo: {presSupEsq:F2}";
+
+        if (textPressaoSuperiorDireito != null) 
+            textPressaoSuperiorDireito.text = $"Pressão Sup. Direito: {presSupDir:F2}";
+
+        if (textPressaoInferiorEsquerdo != null) 
+            textPressaoInferiorEsquerdo.text = $"Pressão Inf. Esquerdo: {presInfEsq:F2}";
+
+        if (textPressaoInferiorDireito != null) 
+            textPressaoInferiorDireito.text = $"Pressão Inf. Direito: {presInfDir:F2}";
+    }
+
     private float ConvertToFloat(object value)
     {
         if (value == null) return 0f;
-        float.TryParse(value.ToString(), out float result);
-        return result;
+
+        if (float.TryParse(value.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out float result))
+        {
+            return result;
+        }
+        return 0f;
     }
 }

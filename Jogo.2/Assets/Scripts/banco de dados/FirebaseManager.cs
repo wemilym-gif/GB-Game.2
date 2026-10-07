@@ -9,6 +9,8 @@ using System;
 
 public class FirebaseManager : MonoBehaviour
 {
+    private string databaseUrl = "https://banco-de-dadosgamebalance-default-rtdb.firebaseio.com/";
+
     // ==========================================
     // ESTRUTURA DE DADOS DA PARTIDA
     // ==========================================
@@ -19,7 +21,6 @@ public class FirebaseManager : MonoBehaviour
         public float oscilacaoMedia;
         public string dataHora;
 
-        // Dados específicos dos 4 quadrantes da Wii Balance Board / Arduino
         public float pressaoSuperiorEsquerdo;
         public float pressaoSuperiorDireito;
         public float pressaoInferiorEsquerdo;
@@ -37,30 +38,20 @@ public class FirebaseManager : MonoBehaviour
         }
     }
 
-    // ==========================================
-    // REFERÊNCIAS DA UI - LOGIN
-    // ==========================================
     [Header("UI - Login")]
     public TMP_InputField campoEmailLogin;
     public TMP_InputField campoSenhaLogin;
     public TMP_Text textoFeedbackLogin;
 
-    // ==========================================
-    // REFERÊNCIAS DA UI - CADASTRO
-    // ==========================================
     [Header("UI - Cadastro")]
     public TMP_InputField campoEmailCadastro;
     public TMP_InputField campoSenhaCadastro;
     public TMP_Text textoFeedbackCadastro;
 
-    // ==========================================
-    // VARIÁVEIS INTERNAS DO FIREBASE
-    // ==========================================
     private DatabaseReference reference;
     private FirebaseAuth auth; 
     private FirebaseUser usuarioLogado; 
 
-    // Singleton
     public static FirebaseManager Instance { get; private set; }
 
     void Awake() {
@@ -76,7 +67,7 @@ public class FirebaseManager : MonoBehaviour
         FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task => {
             var dependencyStatus = task.Result;
             if (dependencyStatus == DependencyStatus.Available) {
-                reference = FirebaseDatabase.DefaultInstance.RootReference;
+                reference = FirebaseDatabase.GetInstance(databaseUrl).RootReference;
                 auth = FirebaseAuth.DefaultInstance;
                 Debug.Log("Firebase inicializado com sucesso!");
             } else {
@@ -85,9 +76,6 @@ public class FirebaseManager : MonoBehaviour
         });
     }
 
-    // ==========================================
-    // MÉTODO: CADASTRO DE PACIENTE (BOTÃO)
-    // ==========================================
     public void CadastrarPaciente()
     {
         if (auth == null) {
@@ -115,14 +103,10 @@ public class FirebaseManager : MonoBehaviour
 
             if (textoFeedbackCadastro != null) textoFeedbackCadastro.text = "Cadastro realizado!";
 
-            // Avança para a próxima cena após o cadastro
             SceneManager.LoadScene("Config - Wii Board");
         });
     }
 
-    // ==========================================
-    // MÉTODO: LOGIN DE PACIENTE (BOTÃO)
-    // ==========================================
     public void FazerLoginPaciente()
     {
         if (auth == null) {
@@ -150,42 +134,48 @@ public class FirebaseManager : MonoBehaviour
 
             if (textoFeedbackLogin != null) textoFeedbackLogin.text = "Login com sucesso!";
 
-            // Avança para a próxima cena após o login
             SceneManager.LoadScene("Config - Wii Board");
         });
     }
 
-    // ==========================================
-    // MÉTODO: SALVAR DADOS DA PARTIDA
-    // ==========================================
     public void SalvarPartidaReal(int pontos, int colisoes, float oscilacao, float se, float sd, float ie, float id) 
     {
         if (usuarioLogado == null && auth != null) {
             usuarioLogado = auth.CurrentUser;
         }
 
-        if (reference == null || usuarioLogado == null) {
-            Debug.LogError("Erro: Nenhum paciente está logado para salvar a partida!");
-            return;
+        if (reference == null) {
+            reference = FirebaseDatabase.GetInstance(databaseUrl).RootReference;
         }
 
-        string idPaciente = usuarioLogado.UserId;
         DadosSessao novaSessao = new DadosSessao(pontos, colisoes, oscilacao, se, sd, ie, id);
         string json = JsonUtility.ToJson(novaSessao);
-
         string chaveDataHora = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
-        reference.Child("jogadores")
-            .Child(idPaciente)
-            .Child("historico_sessoes")
+        // 1. Salva na pasta 'partidas_recentes' (evita conflito com o nó 'jogadores')
+        reference.Child("partidas_recentes")
             .Child(chaveDataHora)
             .SetRawJsonValueAsync(json)
             .ContinueWithOnMainThread(task => {
                 if (task.IsCompleted) {
-                    Debug.Log($"🎉 PARTIDA SALVA! Pontos: {pontos} | Data: {novaSessao.dataHora}");
+                    Debug.Log($"🎉 PARTIDA SALVA EM 'partidas_recentes'! Chave: {chaveDataHora}");
                 } else if (task.IsFaulted) {
                     Debug.LogError($"Erro ao salvar no Realtime Database: {task.Exception}");
                 }
             });
+
+        // 2. Salva também na raiz para manter compatibilidade com chaves antigas
+        reference.Child(chaveDataHora)
+            .SetRawJsonValueAsync(json);
+
+        // 3. Salva no histórico do jogador logado
+        if (usuarioLogado != null) {
+            string idPaciente = usuarioLogado.UserId;
+            reference.Child("jogadores")
+                .Child(idPaciente)
+                .Child("historico_sessoes")
+                .Child(chaveDataHora)
+                .SetRawJsonValueAsync(json);
+        }
     }
 }

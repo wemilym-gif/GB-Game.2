@@ -134,4 +134,12 @@ public class MenuManager : MonoBehaviour
         UltimaCenaVisitada = SceneManager.GetActiveScene().name;
         SceneManager.LoadScene(nomeDaCena);
     }
+   
+    
+    public void VoltarParaCenaInicial()
+    {
+            // Carrega a cena inicial respeitando as letras minúsculas
+            SceneManager.LoadScene("cena inicial");
+    }
+    
 }

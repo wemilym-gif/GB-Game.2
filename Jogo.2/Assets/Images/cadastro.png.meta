@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: cc87f14184f4baa40b3647fadd49a27e
+guid: e02e7537448c9ee44b44f89e0e8c4f27
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3795669051815966394
-    second: cadastro-30-06-2026_0
+      213: -743137822349271296
+    second: cadastro_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -178,13 +178,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cadastro-30-06-2026_0
+      name: cadastro_0
       rect:
         serializedVersion: 2
-        x: 46
-        y: 45
-        width: 933
-        height: 232
+        x: 0
+        y: 0
+        width: 1492
+        height: 1054
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,8 +193,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ab63f6e64ececa430800000000000000
-      internalID: 3795669051815966394
+      spriteID: 00fd6bf7618dfa5f0800000000000000
+      internalID: -743137822349271296
       vertices: []
       indices: 
       edges: []
@@ -213,7 +213,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cadastro-30-06-2026_0: 3795669051815966394
+      cadastro_0: -743137822349271296
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -666,6 +666,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82bef7133b4f5854d9c47f9ca16eaf41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nomeCenaMenuPrincipal: Menu principal
 --- !u!1 &644240481
 GameObject:
   m_ObjectHideFlags: 0
@@ -939,7 +940,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 589412972}
         m_TargetAssemblyTypeName: ButtonController, Assembly-CSharp
-        m_MethodName: QuitButtom
+        m_MethodName: SairParaMenuPrincipal
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2556,7 +2557,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1979975150
 RectTransform:
   m_ObjectHideFlags: 0

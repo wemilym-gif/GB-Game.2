@@ -11,6 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: "Assets/Scenes/sele\xE7\xE3o de perfil.unity"
     guid: e37528f12da2b24489118401590def63
+  - enabled: 1
+    path: Assets/Scenes/Menu principal.unity
+    guid: 0535c9939a346ad4d9cb645af9930ff8
   - enabled: 0
     path: Assets/Scenes/Menu.unity
     guid: 2bd927db7b63f8c48b9eacc30053b6dd

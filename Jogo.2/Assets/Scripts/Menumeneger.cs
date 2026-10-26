@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,25 +8,54 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private GameObject painelHistorico;
     [SerializeField] private GameObject painelAvatar;
 
+    [Header("Gerenciadores")]
+    [SerializeField] private HistoricoManager historicoManager;
+
     [Header("Configurações da Cena")]
     [Tooltip("Nome exato da cena que será carregada ao iniciar a partida")]
     [SerializeField] private string nomeCenaJogo = "Jogo";
 
+    [Tooltip("Nome da cena padrão para voltar, caso o jogo inicie diretamente nesta cena")]
+    [SerializeField] private string cenaAnteriorPadrao = "MenuInicial";
+
+    // Variável estática mantida na memória para registrar a última cena visitada
+    public static string UltimaCenaVisitada = "";
+
+    // Pilha para registrar o histórico de navegação dos painéis
+    private Stack<GameObject> historicoPaineis = new Stack<GameObject>();
+
     /// <summary>
-    /// Exibe o painel de histórico de sessões
+    /// Método auxiliar para abrir um painel e salvá-lo no histórico
     /// </summary>
-    public void AbrirPainelHistorico()
+    public void AbrirPainel(GameObject novoPainel)
     {
-        FecharTodosPaineis();
-        if (painelHistorico != null)
+        if (novoPainel == null) return;
+
+        // Desativa o painel ativo atual, se houver um no topo do histórico
+        if (historicoPaineis.Count > 0)
         {
-            painelHistorico.SetActive(true);
+            GameObject painelAtual = historicoPaineis.Peek();
+            if (painelAtual != null) painelAtual.SetActive(false);
         }
+
+        novoPainel.SetActive(true);
+        historicoPaineis.Push(novoPainel);
     }
 
     /// <summary>
-    /// Oculta o painel de histórico
+    /// Exibe o painel de histórico de sessões e carrega os dados do Firebase
     /// </summary>
+    public void AbrirPainelHistorico()
+    {
+        AbrirPainel(painelHistorico);
+
+        // Dispara a busca no Firebase assim que o painel abre
+        if (historicoManager != null)
+        {
+            historicoManager.CarregarHistoricoSessoes();
+        }
+    }
+
     public void FecharPainelHistorico()
     {
         if (painelHistorico != null)
@@ -34,21 +64,11 @@ public class MenuManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Exibe o painel de seleção de avatar
-    /// </summary>
     public void AbrirPainelAvatar()
     {
-        FecharTodosPaineis();
-        if (painelAvatar != null)
-        {
-            painelAvatar.SetActive(true);
-        }
+        AbrirPainel(painelAvatar);
     }
 
-    /// <summary>
-    /// Oculta o painel de avatar
-    /// </summary>
     public void FecharPainelAvatar()
     {
         if (painelAvatar != null)
@@ -57,28 +77,61 @@ public class MenuManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Fecha todos os painéis abertos
-    /// </summary>
     public void FecharTodosPaineis()
     {
         if (painelHistorico != null) painelHistorico.SetActive(false);
         if (painelAvatar != null) painelAvatar.SetActive(false);
+        historicoPaineis.Clear();
     }
 
-    /// <summary>
-    /// Carrega a cena configurada no Inspector
-    /// </summary>
+    public void BotaoSetaVoltar()
+    {
+        if (historicoPaineis.Count > 0)
+        {
+            GameObject painelAtual = historicoPaineis.Pop();
+            if (painelAtual != null)
+            {
+                painelAtual.SetActive(false);
+            }
+
+            if (historicoPaineis.Count > 0)
+            {
+                GameObject painelAnterior = historicoPaineis.Peek();
+                if (painelAnterior != null)
+                {
+                    painelAnterior.SetActive(true);
+                }
+                return;
+            }
+        }
+
+        VoltarParaCenaAnterior();
+    }
+
+    public void VoltarParaCenaAnterior()
+    {
+        if (!string.IsNullOrEmpty(UltimaCenaVisitada))
+        {
+            SceneManager.LoadScene(UltimaCenaVisitada);
+        }
+        else if (!string.IsNullOrEmpty(cenaAnteriorPadrao))
+        {
+            SceneManager.LoadScene(cenaAnteriorPadrao);
+        }
+        else
+        {
+            Debug.LogWarning("Nenhuma cena anterior foi registrada ou configurada no Inspector.");
+        }
+    }
+
     public void IniciarPartida()
     {
-        SceneManager.LoadScene(nomeCenaJogo);
+        CarregarCenaPorNome(nomeCenaJogo);
     }
 
-    /// <summary>
-    /// Alternativa para carregar qualquer cena passando o nome via botão
-    /// </summary>
     public void CarregarCenaPorNome(string nomeDaCena)
     {
+        UltimaCenaVisitada = SceneManager.GetActiveScene().name;
         SceneManager.LoadScene(nomeDaCena);
     }
 }

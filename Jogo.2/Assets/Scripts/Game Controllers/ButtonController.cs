@@ -7,6 +7,9 @@ public class ButtonController : MonoBehaviour
     [Header("Configuração")]
     public static int remoteIndex = 0;
 
+    [Tooltip("Nome exato da cena do menu principal")]
+    [SerializeField] private string nomeCenaMenuPrincipal = "MenuInicial";
+
     public void PlayButton()
     {
         ICommand play = new LoadSceneCommand("Jogo");
@@ -19,24 +22,19 @@ public class ButtonController : MonoBehaviour
         config.Execute();      
     }
 
-  
     public void PauseButton()
     {
-      
         Time.timeScale = 0f; 
-
-      
         SceneManager.LoadScene("Pause", LoadSceneMode.Additive);    
     }
 
- 
     public void ContinueButton()
     {
        
         Time.timeScale = 1f;
 
-     
-        SceneManager.UnloadSceneAsync("Pause");
+        ICommand calib = new LoadSceneCommand("Calibração - Wii Board");
+        calib.Execute();
     }
     
     public void DropButton()
@@ -59,11 +57,21 @@ public class ButtonController : MonoBehaviour
         restart.Execute();
     }
     
+    
     public void QuitButtom()
     {
         Time.timeScale = 1f;
 
-        ICommand quit = new LoadSceneCommand("Calibração - Wii Board");
+    
+        MenuManager.UltimaCenaVisitada = SceneManager.GetActiveScene().name;
+
+        ICommand quit = new LoadSceneCommand(nomeCenaMenuPrincipal);
         quit.Execute();
     } 
+
+    
+    public void SairParaMenuPrincipal()
+    {
+        QuitButtom();
+    }
 }

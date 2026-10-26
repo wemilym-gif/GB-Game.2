@@ -1222,7 +1222,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2021551706}
         m_TargetAssemblyTypeName: ButtonController, Assembly-CSharp
-        m_MethodName: QuitButtom
+        m_MethodName: SairParaMenuPrincipal
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1570,6 +1570,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82bef7133b4f5854d9c47f9ca16eaf41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nomeCenaMenuPrincipal: Menu principal
 --- !u!4 &2021551707
 Transform:
   m_ObjectHideFlags: 0

@@ -4955,6 +4955,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82bef7133b4f5854d9c47f9ca16eaf41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nomeCenaMenuPrincipal: Menu principal
 --- !u!114 &2145778590
 MonoBehaviour:
   m_ObjectHideFlags: 0

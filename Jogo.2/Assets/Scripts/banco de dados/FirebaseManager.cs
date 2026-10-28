@@ -134,7 +134,8 @@ public class FirebaseManager : MonoBehaviour
 
             if (textoFeedbackLogin != null) textoFeedbackLogin.text = "Login com sucesso!";
 
-            SceneManager.LoadScene("Config - Wii Board");
+            // ALTERADO AQUI: Altere para a cena desejada após o login (ex: "Menu principal")
+            SceneManager.LoadScene("Menu principal");
         });
     }
 

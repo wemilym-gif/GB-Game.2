@@ -112,11 +112,11 @@ public class MenuManager : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(UltimaCenaVisitada))
         {
-            SceneManager.LoadScene(UltimaCenaVisitada);
+            SceneManager.LoadScene(UltimaCenaVisitada.Trim());
         }
         else if (!string.IsNullOrEmpty(cenaAnteriorPadrao))
         {
-            SceneManager.LoadScene(cenaAnteriorPadrao);
+            SceneManager.LoadScene(cenaAnteriorPadrao.Trim());
         }
         else
         {
@@ -131,15 +131,16 @@ public class MenuManager : MonoBehaviour
 
     public void CarregarCenaPorNome(string nomeDaCena)
     {
-        UltimaCenaVisitada = SceneManager.GetActiveScene().name;
-        SceneManager.LoadScene(nomeDaCena);
+        UltimaCenaVisitada = SceneManager.GetActiveScene().name.Trim();
+
+        if (!string.IsNullOrEmpty(nomeDaCena))
+        {
+            SceneManager.LoadScene(nomeDaCena.Trim());
+        }
     }
-   
-    
+
     public void VoltarParaCenaInicial()
     {
-            // Carrega a cena inicial respeitando as letras minúsculas
-            SceneManager.LoadScene("cena inicial");
+        SceneManager.LoadScene("cena inicial".Trim());
     }
-    
 }

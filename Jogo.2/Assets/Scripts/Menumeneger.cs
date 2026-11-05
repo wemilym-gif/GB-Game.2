@@ -24,12 +24,25 @@ public class MenuManager : MonoBehaviour
     // Pilha para registrar o histórico de navegação dos painéis
     private Stack<GameObject> historicoPaineis = new Stack<GameObject>();
 
+    private void Awake()
+    {
+        // Tenta encontrar automaticamente o HistoricoManager na cena caso esteja nulo
+        if (historicoManager == null)
+        {
+            historicoManager = Object.FindAnyObjectByType<HistoricoManager>();
+        }
+    }
+
     /// <summary>
     /// Método auxiliar para abrir um painel e salvá-lo no histórico
     /// </summary>
     public void AbrirPainel(GameObject novoPainel)
     {
-        if (novoPainel == null) return;
+        if (novoPainel == null)
+        {
+            Debug.LogWarning("⚠️ [MenuManager] Tentativa de abrir um painel NULO.");
+            return;
+        }
 
         // Desativa o painel ativo atual, se houver um no topo do histórico
         if (historicoPaineis.Count > 0)
@@ -47,12 +60,25 @@ public class MenuManager : MonoBehaviour
     /// </summary>
     public void AbrirPainelHistorico()
     {
+        Debug.Log("🚀 [MenuManager] Botão 'Histórico de sessões' acionado!");
+
         AbrirPainel(painelHistorico);
+
+        // Garante a busca do HistoricoManager caso ainda não esteja associado
+        if (historicoManager == null)
+        {
+            historicoManager = Object.FindAnyObjectByType<HistoricoManager>();
+        }
 
         // Dispara a busca no Firebase assim que o painel abre
         if (historicoManager != null)
         {
+            Debug.Log("🚀 [MenuManager] Solicitando carregamento das sessões ao HistoricoManager...");
             historicoManager.CarregarHistoricoSessoes();
+        }
+        else
+        {
+            Debug.LogError("❌ [MenuManager] O script 'HistoricoManager' não foi encontrado na cena!");
         }
     }
 

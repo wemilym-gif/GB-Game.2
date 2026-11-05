@@ -20,6 +20,13 @@ public class HistoricoManager : MonoBehaviour
         GarantirInicializacao();
     }
 
+    // DISPARA AUTOMATICAMENTE SEMPRE QUE O PAINEL É ATIVADO NA CENA
+    private void OnEnable()
+    {
+        Debug.Log("🔄 [HistoricoManager] Painel ativado! A iniciar busca no Firebase...");
+        CarregarHistoricoSessoes();
+    }
+
     private void GarantirInicializacao()
     {
         if (auth == null) auth = FirebaseAuth.DefaultInstance;
@@ -75,6 +82,10 @@ public class HistoricoManager : MonoBehaviour
                     if (itemHistoricoPrefab != null && containerLista != null)
                     {
                         GameObject novoItem = Instantiate(itemHistoricoPrefab, containerLista, false);
+                        
+                        // Garante que a partida mais recente fique no topo da lista
+                        novoItem.transform.SetAsFirstSibling();
+
                         ItemHistoricoUI scriptItem = novoItem.GetComponent<ItemHistoricoUI>();
 
                         if (scriptItem != null)
